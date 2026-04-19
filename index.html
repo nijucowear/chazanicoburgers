@@ -516,6 +516,15 @@
         };
         let currentUserRole = null;
 
+        // --- CONFIGURACIÓN DE GITHUB ---
+        const GITHUB_CONFIG = {
+            token: "TU_TOKEN_AQUI",          // Pega tu Personal Access Token de GitHub aquí
+            owner: "tu_usuario_github",      // Tu nombre de usuario en GitHub
+            repo: "tu_repositorio",          // El nombre de tu repositorio (EJ: "ventas-chaza")
+            path: "data_chaza.json",         // El nombre del archivo donde se guardará la info
+            sha: null                        // No modificar, se usa internamente por el sistema
+        };
+
         function checkLogin() {
             const input = document.getElementById('password-input').value;
             let role = null;
@@ -547,56 +556,93 @@
         }
 
         async function loadServerData() {
+            if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === "TU_TOKEN_AQUI") {
+                console.warn("GitHub Token no configurado. Usando datos locales temporalmente.");
+                menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
+                salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
+                renderMenu();
+                updateDailySummary();
+                return;
+            }
+
             try {
-                const response = await fetch('api.php?business=chaza');
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
                 if (response.ok) {
                     const data = await response.json();
-                    let needsSave = false;
+                    GITHUB_CONFIG.sha = data.sha;
                     
-                    if (data.menu) {
-                        menu = data.menu;
-                    } else {
-                        // Inicializar local si el server está vacío (migración)
-                        menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
-                        needsSave = true;
-                    }
-
-                    if (data.salesHistory && data.salesHistory.length > 0) {
-                        salesHistory = data.salesHistory;
-                    } else if (!data.salesHistory || data.salesHistory.length === 0) {
-                        // Inicializar local si el server está vacío (migración)
-                        let localSales = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
-                        if (localSales.length === 0) {
-                            let oldHistory = JSON.parse(localStorage.getItem('chaza_sales_history')) || [];
-                            if (oldHistory.length > 0) localSales = oldHistory;
-                        }
-                        if (localSales.length > 0) {
-                            salesHistory = localSales;
-                            needsSave = true;
-                        }
-                    }
-
-                    if (needsSave) {
-                        await saveServerData();
-                    }
-
+                    // Decodificar Base64 respetando acentos y eñes
+                    const content = decodeURIComponent(escape(atob(data.content)));
+                    const jsonData = JSON.parse(content);
+                    
+                    if (jsonData.menu) menu = jsonData.menu;
+                    if (jsonData.salesHistory) salesHistory = jsonData.salesHistory;
+                    
                     renderMenu();
                     updateDailySummary();
+                } else if (response.status === 404) {
+                    // El archivo no existe aún en GitHub, lo creamos subiendo lo local
+                    console.log("Creando nuevo archivo en GitHub...");
+                    menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
+                    salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
+                    await saveServerData();
+                    renderMenu();
+                    updateDailySummary();
+                } else {
+                    console.error("Error al cargar de GitHub:", await response.text());
                 }
             } catch (error) {
-                console.error("Error cargando datos del servidor. Se usarán datos locales por ahora.", error);
+                console.error("Error de red cargando datos de GitHub:", error);
             }
         }
 
         async function saveServerData() {
+            if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === "TU_TOKEN_AQUI") {
+                return; // Si no hay token configurado, solo se guarda en localStorage
+            }
+
             try {
-                await fetch('api.php?business=chaza', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ menu: menu, salesHistory: salesHistory })
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+                const jsonData = JSON.stringify({ menu: menu, salesHistory: salesHistory });
+                
+                // Codificar a Base64 respetando caracteres latinos
+                const content = btoa(unescape(encodeURIComponent(jsonData)));
+                
+                const body = {
+                    message: "Actualización automática de base de datos Chaza",
+                    content: content
+                };
+                
+                if (GITHUB_CONFIG.sha) {
+                    body.sha = GITHUB_CONFIG.sha;
+                }
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
                 });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    GITHUB_CONFIG.sha = data.content.sha; // Actualizar el SHA interno para poder volver a guardar luego
+                    console.log("Guardado en GitHub exitosamente.");
+                } else {
+                     console.error("Error al guardar en GitHub:", await response.text());
+                }
             } catch (error) {
-                console.error("Error guardando datos en el servidor:", error);
+                console.error("Error de red guardando en GitHub:", error);
             }
         }
 
