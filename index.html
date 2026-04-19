@@ -44,7 +44,7 @@
             border-right: 1px solid var(--border);
         }
 
-        h1, h2 {
+        h2 {
             margin-bottom: 20px;
             color: var(--text);
         }
@@ -189,10 +189,9 @@
 
         .btn-pay { background: var(--success); }
         .btn-clear { background: #ff4757; }
-        .btn-export { background: #2f3542; }
 
-        /* Modals */
-        .modal-overlay {
+        /* Settings Modal */
+        #settingsModal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -226,28 +225,15 @@
             border-radius: 4px;
         }
 
-        .top-buttons {
+        .btn-settings {
             position: absolute;
-            top: 15px; right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .btn-top {
+            top: 20px; right: 20px;
             background: white;
             border: 1px solid var(--border);
             padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-        }
-
-        .btn-top:hover {
-            background: var(--bg);
-            transform: translateY(-2px);
+            z-index: 10;
         }
         
         .summary-box {
@@ -261,23 +247,39 @@
 </head>
 <body>
 
-    <div class="top-buttons">
-        <button class="btn-top" onclick="openSummaryModal()">📊 Resumen del Día</button>
-        <button class="btn-top" onclick="openSettings()">⚙️ Configurar Menú</button>
-    </div>
+    <button class="btn-settings" onclick="openSettings()">⚙️ Configurar Menú</button>
 
     <div class="layout">
         <!-- Products Area -->
         <div class="products-section">
-            <h1>🍔 Menú Nico Burgers</h1>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="margin: 0; font-size: 2rem;">🍔 Menú Nico Burgers</h1>
+                
+                <div style="background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center;">
+                    <label for="workDate" style="font-weight: bold; color: var(--text); margin-right: 10px;">📅 Fecha del Turno:</label>
+                    <input type="date" id="workDate" onchange="updateDailySummary()" style="padding: 5px; border-radius: 4px; border: 1px solid var(--border); font-family: inherit; font-size: 1rem; outline: none; cursor: pointer;">
+                </div>
+            </div>
             
             <div id="menu-container"></div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #ccc;">
+                <h2>📊 Resumen del Día</h2>
+                <div id="daily-summary" style="font-size: 1.1rem; line-height: 1.6;">
+                    Aún no hay ventas registradas para esta fecha.
+                </div>
+                
+                <button onclick="cerrarCaja()" style="background:#2f3542; color:white; border:none; padding:15px; border-radius:8px; cursor:pointer; width:100%; font-size:1.1rem; margin-top:20px; font-weight:bold; transition: opacity 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    🔒 Hacer Cierre de Caja (Descargar Excel y Empezar de Cero)
+                </button>
+            </div>
         </div>
 
         <!-- Cart Area -->
         <div class="cart-section">
             <div class="cart-header">
-                <h2>📝 Pedido Actual</h2>
+                <h2 style="margin:0;">📝 Pedido Actual</h2>
             </div>
             
             <div class="cart-items" id="cart-items">
@@ -305,22 +307,8 @@
         </div>
     </div>
 
-    <!-- Summary Modal -->
-    <div id="summaryModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>📊 Resumen del Día</h2>
-            <div id="daily-summary" style="font-size: 1.1rem; line-height: 1.6; margin-top: 15px;">
-                Aún no hay ventas registradas hoy.
-            </div>
-            <div style="margin-top: 25px; display: flex; gap: 10px;">
-                <button class="action-btn btn-export" style="margin-bottom: 0;" onclick="exportToExcel()">📥 Descargar en Excel</button>
-                <button class="action-btn btn-clear" style="margin-bottom: 0;" onclick="closeSummaryModal()">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Settings Modal -->
-    <div id="settingsModal" class="modal-overlay">
+    <div id="settingsModal">
         <div class="modal-content">
             <h2>Configurar Menú y Precios</h2>
             <p style="margin-bottom: 20px; color: #666;">Puedes cambiar los nombres, actualizar precios o agregar productos nuevos. Todo se guarda automáticamente.</p>
@@ -365,7 +353,7 @@
             ]
         };
 
-        // State - We use a new key to force the new menu version but preserve old sales history
+        // State 
         let menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
         let cart = [];
         let salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
@@ -478,9 +466,10 @@
 
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
             const now = new Date();
+            const workDate = document.getElementById('workDate').value || now.toISOString().split('T')[0];
             
             const order = {
-                date: now.toLocaleDateString(),
+                date: workDate,
                 time: now.toLocaleTimeString(),
                 items: [...cart],
                 method: paymentMethod,
@@ -506,11 +495,11 @@
         }
 
         function updateDailySummary() {
-            const today = new Date().toLocaleDateString();
-            const todaysOrders = salesHistory.filter(o => o.date === today);
+            const selectedDate = document.getElementById('workDate').value;
+            const todaysOrders = salesHistory.filter(o => o.date === selectedDate);
             
             if (todaysOrders.length === 0) {
-                document.getElementById('daily-summary').innerHTML = 'Aún no hay ventas registradas hoy.';
+                document.getElementById('daily-summary').innerHTML = '<p style="color:#666;">Aún no hay ventas registradas para esta fecha.</p>';
                 return;
             }
 
@@ -522,7 +511,6 @@
                 if (order.method === 'Nequi') {
                     totalNequi += order.total;
                 } else {
-                    // Default to Efectivo for older orders as well
                     totalEfectivo += order.total;
                 }
                 
@@ -535,7 +523,7 @@
 
             let summaryHTML = `
                 <div class="summary-box">
-                    <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">Total Hoy: ${formatMoney(totalDia)}</div>
+                    <div style="font-size:1.3rem; font-weight:bold; margin-bottom:5px;">Total Turno: ${formatMoney(totalDia)}</div>
                     <div style="color:#2ed573;">💵 Efectivo: ${formatMoney(totalEfectivo)}</div>
                     <div style="color:#6c5ce7;">📱 Nequi: ${formatMoney(totalNequi)}</div>
                 </div>
@@ -549,7 +537,7 @@
             document.getElementById('daily-summary').innerHTML = summaryHTML;
         }
 
-        // Export to CSV/Excel
+        // Export to CSV/Excel and Close Register
         function exportToExcel() {
             if (salesHistory.length === 0) {
                 alert("No hay ventas para exportar.");
@@ -557,16 +545,16 @@
             }
 
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Fecha,Hora,Metodo Pago,Producto,Cantidad,Precio Unitario,TotalLinea\n";
+            csvContent += "Fecha Turno,Hora Registro,Metodo Pago,Producto,Cantidad,Precio Unitario,TotalLinea\n";
 
             salesHistory.forEach(order => {
-                const method = order.method || 'Efectivo'; // Fallback for old orders
+                const method = order.method || 'Efectivo';
                 order.items.forEach(item => {
                     const row = [
                         order.date,
                         order.time,
                         method,
-                        `"${item.name}"`, // Quote to avoid commas breaking CSV
+                        `"${item.name}"`, 
                         item.quantity,
                         item.price,
                         item.price * item.quantity
@@ -578,10 +566,31 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Ventas_Chaza_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+            const workDate = document.getElementById('workDate').value || new Date().toISOString().split('T')[0];
+            link.setAttribute("download", `Cierre_Caja_${workDate}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        function cerrarCaja() {
+            if (salesHistory.length === 0) {
+                alert("No hay ventas registradas para hacer cierre.");
+                return;
+            }
+            
+            const confirmMsg = "¿Estás seguro de hacer el Cierre de Caja?\n\nAl hacer esto:\n1. Se descargará el archivo de Excel con las ventas actuales.\n2. El sistema se reiniciará a $0 para comenzar un nuevo turno limpio.";
+            
+            if(confirm(confirmMsg)) {
+                exportToExcel();
+                
+                // Clear the history after export
+                salesHistory = [];
+                localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory));
+                
+                updateDailySummary();
+                alert("✅ Cierre de caja exitoso. El sistema está en cero para un nuevo turno.");
+            }
         }
 
         // Settings Logic
@@ -651,20 +660,17 @@
             renderCart(); // refresh in case names changed while in cart
         }
 
-        function openSummaryModal() {
+        // Init - Set today's date automatically
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('workDate').value = today;
+            
+            renderMenu();
+            renderCart();
             updateDailySummary();
-            document.getElementById('summaryModal').style.display = 'flex';
-        }
-
-        function closeSummaryModal() {
-            document.getElementById('summaryModal').style.display = 'none';
-        }
-
-        // Init
-        renderMenu();
-        renderCart();
-        updateDailySummary();
+        });
 
     </script>
 </body>
 </html>
+
