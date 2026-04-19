@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punto de Venta - Chaza</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #ff4757;
@@ -516,14 +517,18 @@
         };
         let currentUserRole = null;
 
-        // --- CONFIGURACIÓN DE GITHUB ---
-        const GITHUB_CONFIG = {
-            token: "TU_TOKEN_AQUI",          // Pega tu Personal Access Token de GitHub aquí
-            owner: "tu_usuario_github",      // Tu nombre de usuario en GitHub
-            repo: "tu_repositorio",          // El nombre de tu repositorio (EJ: "ventas-chaza")
-            path: "data_chaza.json",         // El nombre del archivo donde se guardará la info
-            sha: null                        // No modificar, se usa internamente por el sistema
+        // --- CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_CONFIG = {
+            url: https://xtknveudnkxrzglueznp.supabase.co,          // Pega tu Project URL de Supabase
+            key: sb_publishable_9p31KlGrqiMa5H9mhjfNdA_Ej37n4Do,     // Pega tu Project API anon key
+            table: "store_data",             // El nombre de la tabla creada
+            recordId: "chaza"                // El identificador para este negocio
         };
+        
+        let supabaseClient = null;
+        if (SUPABASE_CONFIG.url !== "TU_SUPABASE_URL") {
+            supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        }
 
         function checkLogin() {
             const input = document.getElementById('password-input').value;
@@ -556,8 +561,8 @@
         }
 
         async function loadServerData() {
-            if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === "TU_TOKEN_AQUI") {
-                console.warn("GitHub Token no configurado. Usando datos locales temporalmente.");
+            if (!supabaseClient) {
+                console.warn("Supabase no configurado. Usando datos locales temporalmente.");
                 menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
                 salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
                 renderMenu();
@@ -566,83 +571,59 @@
             }
 
             try {
-                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
+                const { data, error } = await supabaseClient
+                    .from(SUPABASE_CONFIG.table)
+                    .select('*')
+                    .eq('id', SUPABASE_CONFIG.recordId)
+                    .single();
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    GITHUB_CONFIG.sha = data.sha;
-                    
-                    // Decodificar Base64 respetando acentos y eñes
-                    const content = decodeURIComponent(escape(atob(data.content)));
-                    const jsonData = JSON.parse(content);
-                    
-                    if (jsonData.menu) menu = jsonData.menu;
-                    if (jsonData.salesHistory) salesHistory = jsonData.salesHistory;
-                    
-                    renderMenu();
-                    updateDailySummary();
-                } else if (response.status === 404) {
-                    // El archivo no existe aún en GitHub, lo creamos subiendo lo local
-                    console.log("Creando nuevo archivo en GitHub...");
+                if (error && error.code === 'PGRST116') {
+                    // El archivo no existe aún en Supabase, lo creamos subiendo lo local
+                    console.log("Creando nuevo registro en Supabase...");
                     menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
                     salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
                     await saveServerData();
                     renderMenu();
                     updateDailySummary();
-                } else {
-                    console.error("Error al cargar de GitHub:", await response.text());
+                    return;
+                } else if (error) {
+                    console.error("Error al cargar de Supabase:", error.message);
+                    return;
+                }
+                
+                if (data) {
+                    if (data.menu) menu = data.menu;
+                    if (data.salesHistory) salesHistory = data.salesHistory;
+                    
+                    renderMenu();
+                    updateDailySummary();
                 }
             } catch (error) {
-                console.error("Error de red cargando datos de GitHub:", error);
+                console.error("Error de red cargando datos de Supabase:", error);
             }
         }
 
         async function saveServerData() {
-            if (!GITHUB_CONFIG.token || GITHUB_CONFIG.token === "TU_TOKEN_AQUI") {
+            if (!supabaseClient) {
                 return; // Si no hay token configurado, solo se guarda en localStorage
             }
 
             try {
-                const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-                const jsonData = JSON.stringify({ menu: menu, salesHistory: salesHistory });
+                const { error } = await supabaseClient
+                    .from(SUPABASE_CONFIG.table)
+                    .upsert({ 
+                        id: SUPABASE_CONFIG.recordId, 
+                        menu: menu, 
+                        salesHistory: salesHistory 
+                    });
                 
-                // Codificar a Base64 respetando caracteres latinos
-                const content = btoa(unescape(encodeURIComponent(jsonData)));
-                
-                const body = {
-                    message: "Actualización automática de base de datos Chaza",
-                    content: content
-                };
-                
-                if (GITHUB_CONFIG.sha) {
-                    body.sha = GITHUB_CONFIG.sha;
-                }
-
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    GITHUB_CONFIG.sha = data.content.sha; // Actualizar el SHA interno para poder volver a guardar luego
-                    console.log("Guardado en GitHub exitosamente.");
+                if (error) {
+                     console.error("Error al guardar en Supabase:", error.message);
                 } else {
-                     console.error("Error al guardar en GitHub:", await response.text());
+                     console.log("Guardado en Supabase exitosamente.");
                 }
             } catch (error) {
-                console.error("Error de red guardando en GitHub:", error);
+                console.error("Error de red guardando en Supabase:", error);
             }
         }
 
