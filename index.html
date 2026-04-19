@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,9 +54,9 @@
         }
 
         .top-bar {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 10px;
@@ -68,7 +69,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             gap: 5px;
@@ -90,7 +91,7 @@
             left: 0;
             background-color: white;
             min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             border-radius: 8px;
             border: 1px solid var(--border);
@@ -122,7 +123,8 @@
             display: block;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             margin-bottom: 20px;
             color: var(--text);
         }
@@ -152,14 +154,14 @@
             padding: 20px 10px;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
             user-select: none;
         }
 
         .product-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             border-color: var(--primary-hover);
         }
 
@@ -183,7 +185,7 @@
             flex: 1;
             background: var(--card);
             overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
         }
 
         .cart-wrapper {
@@ -269,17 +271,29 @@
             opacity: 0.9;
         }
 
-        .btn-pay { background: var(--success); }
-        .btn-clear { background: #ff4757; }
-        .btn-export { background: #2f3542; }
+        .btn-pay {
+            background: var(--success);
+        }
+
+        .btn-clear {
+            background: #ff4757;
+        }
+
+        .btn-export {
+            background: #2f3542;
+        }
 
         /* Settings Modal */
         #settingsModal {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center; justify-content: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
         }
 
@@ -307,17 +321,64 @@
             border: 1px solid var(--border);
             border-radius: 4px;
         }
-        
+
         .summary-box {
             background: white;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            display: flex;
+            align-items: center; justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-box h2 { margin-bottom: 20px; color: var(--text); }
+        .login-box input {
+            width: 100%; padding: 12px; margin-bottom: 20px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 1.1rem; text-align: center;
+        }
+        .login-box button {
+            width: 100%; padding: 12px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .login-box button:hover { background: var(--primary-hover); transform: translateY(-2px); }
     </style>
 </head>
+
 <body>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>🔐 Acceso al Sistema</h2>
+            <p style="margin-bottom: 15px; color: #666;">Por favor, ingresa la contraseña para continuar.</p>
+            <input type="password" id="password-input" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <button onclick="checkLogin()">Ingresar</button>
+            <p id="login-error" style="color: var(--primary); margin-top: 15px; display: none; font-weight: bold;">Contraseña incorrecta</p>
+        </div>
+    </div>
 
     <div class="layout">
         <!-- Products Area -->
@@ -336,7 +397,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="menu-container"></div>
         </div>
 
@@ -346,7 +407,7 @@
                 <div class="cart-header">
                     <h2 style="margin: 0;">📝 Pedido Actual</h2>
                 </div>
-                
+
                 <div class="cart-items" id="cart-items">
                     <!-- Items will be injected here -->
                 </div>
@@ -356,34 +417,43 @@
                         <span>Total:</span>
                         <span id="cart-total">$0</span>
                     </div>
-                    
-                    <div style="margin-bottom: 15px; display: flex; justify-content: space-around; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
-                        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem;">
-                            <input type="radio" name="payment_method" value="Efectivo" checked style="width:20px; height:20px;"> 💵 Efectivo
+
+                    <div
+                        style="margin-bottom: 15px; display: flex; justify-content: space-around; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                        <label
+                            style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem;">
+                            <input type="radio" name="payment_method" value="Efectivo" checked
+                                style="width:20px; height:20px;"> 💵 Efectivo
                         </label>
-                        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; color: #6c5ce7;">
-                            <input type="radio" name="payment_method" value="Nequi" style="width:20px; height:20px;"> 📱 Nequi
+                        <label
+                            style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; color: #6c5ce7;">
+                            <input type="radio" name="payment_method" value="Nequi" style="width:20px; height:20px;"> 📱
+                            Nequi
                         </label>
                     </div>
 
                     <button class="action-btn btn-pay" onclick="processPayment()">✅ Registrar Pedido</button>
-                    <button class="action-btn btn-clear" style="margin-bottom: 0;" onclick="clearCart()">🗑️ Cancelar Pedido</button>
+                    <button class="action-btn btn-clear" style="margin-bottom: 0;" onclick="clearCart()">🗑️ Cancelar
+                        Pedido</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Summary Modal -->
-    <div id="summaryModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div id="summaryModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="margin: 0;">📊 Resumen del Día</h2>
-                <button onclick="closeSummary()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <button onclick="closeSummary()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
             <div id="daily-summary" style="font-size: 1.1rem; line-height: 1.6;">
                 Aún no hay ventas registradas hoy.
             </div>
-            <button class="action-btn btn-export" style="margin-top: 20px; margin-bottom: 0;" onclick="exportToExcel()">📥 Descargar en Excel</button>
+            <button class="action-btn btn-export" style="margin-top: 20px; margin-bottom: 0;"
+                onclick="exportToExcel()">📥 Descargar en Excel</button>
         </div>
     </div>
 
@@ -391,9 +461,11 @@
     <div id="settingsModal">
         <div class="modal-content">
             <h2>Configurar Menú y Precios</h2>
-            <p style="margin-bottom: 20px; color: #666;">Puedes cambiar los nombres, actualizar precios o agregar productos nuevos. Todo se guarda automáticamente.</p>
+            <p style="margin-bottom: 20px; color: #666;">Puedes cambiar los nombres, actualizar precios o agregar
+                productos nuevos. Todo se guarda automáticamente.</p>
             <div id="settings-container"></div>
-            <button class="action-btn btn-pay" style="margin-top: 20px;" onclick="closeSettings()">Guardar y Cerrar</button>
+            <button class="action-btn btn-pay" style="margin-top: 20px;" onclick="closeSettings()">Guardar y
+                Cerrar</button>
         </div>
     </div>
 
@@ -433,16 +505,99 @@
             ]
         };
 
-        // State - We use a new key to force the new menu version but preserve old sales history
-        let menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
+        // State
+        let menu = defaultMenu;
         let cart = [];
-        let salesHistory = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
-        
-        // Migrate old sales history if exists
-        const oldHistory = localStorage.getItem('chaza_sales_history');
-        if (oldHistory && salesHistory.length === 0) {
-            salesHistory = JSON.parse(oldHistory);
-            localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory));
+        let salesHistory = [];
+
+        const PASSWORDS = {
+            admin: "admin1234",
+            empleado: "ventas1234"
+        };
+        let currentUserRole = null;
+
+        function checkLogin() {
+            const input = document.getElementById('password-input').value;
+            let role = null;
+            if (input === PASSWORDS.admin) role = 'admin';
+            else if (input === PASSWORDS.empleado) role = 'empleado';
+
+            if (role) {
+                document.getElementById('login-screen').style.display = 'none';
+                sessionStorage.setItem('isLoggedIn_chaza', 'true');
+                sessionStorage.setItem('userRole_chaza', role);
+                applyRolePermissions(role);
+                loadServerData();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function applyRolePermissions(role) {
+            currentUserRole = role;
+            if (role === 'empleado') {
+                // Ocultar botones de cierre de caja y configuración para empleados
+                const btns = document.querySelectorAll('.dropdown-content button');
+                btns.forEach(btn => {
+                    if (btn.innerText.includes('Cierre de Caja') || btn.innerText.includes('Configurar')) {
+                        btn.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        async function loadServerData() {
+            try {
+                const response = await fetch('api.php?business=chaza');
+                if (response.ok) {
+                    const data = await response.json();
+                    let needsSave = false;
+                    
+                    if (data.menu) {
+                        menu = data.menu;
+                    } else {
+                        // Inicializar local si el server está vacío (migración)
+                        menu = JSON.parse(localStorage.getItem('chaza_menu_v2')) || defaultMenu;
+                        needsSave = true;
+                    }
+
+                    if (data.salesHistory && data.salesHistory.length > 0) {
+                        salesHistory = data.salesHistory;
+                    } else if (!data.salesHistory || data.salesHistory.length === 0) {
+                        // Inicializar local si el server está vacío (migración)
+                        let localSales = JSON.parse(localStorage.getItem('chaza_sales_history_v2')) || [];
+                        if (localSales.length === 0) {
+                            let oldHistory = JSON.parse(localStorage.getItem('chaza_sales_history')) || [];
+                            if (oldHistory.length > 0) localSales = oldHistory;
+                        }
+                        if (localSales.length > 0) {
+                            salesHistory = localSales;
+                            needsSave = true;
+                        }
+                    }
+
+                    if (needsSave) {
+                        await saveServerData();
+                    }
+
+                    renderMenu();
+                    updateDailySummary();
+                }
+            } catch (error) {
+                console.error("Error cargando datos del servidor. Se usarán datos locales por ahora.", error);
+            }
+        }
+
+        async function saveServerData() {
+            try {
+                await fetch('api.php?business=chaza', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ menu: menu, salesHistory: salesHistory })
+                });
+            } catch (error) {
+                console.error("Error guardando datos en el servidor:", error);
+            }
         }
 
         // Formatting
@@ -457,7 +612,7 @@
 
             for (const [category, items] of Object.entries(menu)) {
                 let categoryHTML = `<div class="category"><h2>${category}</h2><div class="product-grid">`;
-                
+
                 items.forEach(item => {
                     categoryHTML += `
                         <div class="product-btn" onclick="addToCart('${item.id}')">
@@ -476,7 +631,7 @@
             const container = document.getElementById('cart-items');
             const totalEl = document.getElementById('cart-total');
             container.innerHTML = '';
-            
+
             let total = 0;
 
             if (cart.length === 0) {
@@ -532,7 +687,7 @@
         }
 
         function clearCart() {
-            if(confirm("¿Estás seguro de cancelar este pedido?")) {
+            if (confirm("¿Estás seguro de cancelar este pedido?")) {
                 cart = [];
                 renderCart();
             }
@@ -546,7 +701,7 @@
 
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
             const now = new Date();
-            
+
             const order = {
                 date: now.toLocaleDateString(),
                 time: now.toLocaleTimeString(),
@@ -556,13 +711,14 @@
             };
 
             salesHistory.push(order);
-            localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory));
-            
+            localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory)); // Backup local
+            saveServerData();
+
             cart = [];
             document.querySelector('input[name="payment_method"][value="Efectivo"]').checked = true; // reset to default
             renderCart();
             updateDailySummary();
-            
+
             const btn = document.querySelector('.btn-pay');
             const originalText = btn.innerText;
             btn.innerText = "¡Registrado!";
@@ -576,7 +732,7 @@
         function updateDailySummary() {
             const today = new Date().toLocaleDateString();
             const todaysOrders = salesHistory.filter(o => o.date === today);
-            
+
             if (todaysOrders.length === 0) {
                 document.getElementById('daily-summary').innerHTML = 'Aún no hay ventas registradas hoy.';
                 return;
@@ -593,7 +749,7 @@
                     // Default to Efectivo for older orders as well
                     totalEfectivo += order.total;
                 }
-                
+
                 order.items.forEach(item => {
                     itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
                 });
@@ -608,7 +764,7 @@
                     <div style="color:#6c5ce7;">📱 Nequi: ${formatMoney(totalNequi)}</div>
                 </div>
                 <strong>Cantidades Vendidas:</strong><ul style="margin-top:5px; padding-left: 20px;">`;
-            
+
             for (const [name, qty] of Object.entries(itemCounts)) {
                 summaryHTML += `<li>${name}: <strong>${qty}</strong></li>`;
             }
@@ -654,6 +810,10 @@
 
         // Settings Logic
         function openSettings() {
+            if (currentUserRole !== 'admin') {
+                alert("Solo los administradores pueden modificar el menú.");
+                return;
+            }
             const container = document.getElementById('settings-container');
             container.innerHTML = '';
 
@@ -663,7 +823,7 @@
                     <h3 style="color:#555; margin:0;">${category}</h3>
                     <button onclick="addProduct('${category}')" style="background:var(--success); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">+ Agregar</button>
                 </div>`;
-                
+
                 items.forEach(item => {
                     catHTML += `
                         <div class="price-input-group">
@@ -693,7 +853,7 @@
                 saveMenu();
             }
         }
-        
+
         function addProduct(category) {
             const newId = 'prod_' + Math.random().toString(36).substr(2, 9);
             menu[category].push({ id: newId, name: "Nuevo Producto", price: 0 });
@@ -702,15 +862,16 @@
         }
 
         function deleteProduct(category, id) {
-            if(confirm("¿Seguro que deseas eliminar este producto del menú?")) {
+            if (confirm("¿Seguro que deseas eliminar este producto del menú?")) {
                 menu[category] = menu[category].filter(i => i.id !== id);
                 saveMenu();
                 openSettings(); // refresh view
             }
         }
-        
+
         function saveMenu() {
-            localStorage.setItem('chaza_menu_v2', JSON.stringify(menu));
+            localStorage.setItem('chaza_menu_v2', JSON.stringify(menu)); // Backup local
+            saveServerData();
             renderMenu();
         }
 
@@ -724,7 +885,7 @@
             document.getElementById("mainMenuDropdown").classList.toggle("show");
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (!event.target.matches('.header-btn')) {
                 var dropdowns = document.getElementsByClassName("dropdown");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -743,6 +904,10 @@
         }
 
         function closeRegister() {
+            if (currentUserRole !== 'admin') {
+                alert("Solo los administradores pueden hacer el cierre de caja.");
+                return;
+            }
             if (salesHistory.length === 0) {
                 alert("No hay ventas para cerrar en este turno.");
                 return;
@@ -750,7 +915,8 @@
             if (confirm("¿Estás seguro de hacer el cierre de caja?\nEsto descargará el reporte de hoy en Excel y reiniciará las ventas para un nuevo turno.")) {
                 exportToExcel();
                 salesHistory = [];
-                localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory));
+                localStorage.setItem('chaza_sales_history_v2', JSON.stringify(salesHistory)); // Backup local
+                saveServerData();
                 updateDailySummary();
                 alert("Cierre de caja exitoso. Las ventas se han reiniciado.");
             }
@@ -767,10 +933,25 @@
         }
 
         // Init
-        renderMenu();
         renderCart();
-        updateDailySummary();
+        
+        if (sessionStorage.getItem('isLoggedIn_chaza') === 'true') {
+            document.getElementById('login-screen').style.display = 'none';
+            applyRolePermissions(sessionStorage.getItem('userRole_chaza'));
+            loadServerData();
+        } else {
+            renderMenu();
+            updateDailySummary();
+        }
+
+        // Refrescar datos en segundo plano
+        setInterval(() => {
+            if (sessionStorage.getItem('isLoggedIn_chaza') === 'true') {
+                loadServerData();
+            }
+        }, 3000);
 
     </script>
 </body>
+
 </html>
