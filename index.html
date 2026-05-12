@@ -385,7 +385,7 @@
         <!-- Products Area -->
         <div class="products-section">
             <div class="top-bar">
-                <h1 style="margin: 0;">🍓 El Obleazo de Juancho</h1>
+                <h1 style="margin: 0;">🍔 Menú Nico Burgers</h1>
                 <div class="dropdown" id="mainMenuDropdown">
                     <button class="header-btn" onclick="toggleDropdown()">
                         ☰ Opciones
@@ -472,29 +472,39 @@
 
     <script>
         // Data Structure
-const defaultMenu = {
-
-    "Obleas": [
-        { id: "o1", name: "Sencilla", price: 2800 },
-        { id: "o2", name: "Noviazgo", price: 3800 },
-        { id: "o3", name: "Primer Amor", price: 3800 },
-        { id: "o4", name: "Delirio de Amor", price: 4800 },
-        { id: "o5", name: "Amor Irresistible", price: 4800 },
-        { id: "o6", name: "Gran Amor", price: 5800 },
-        { id: "o7", name: "Dulce Picardía", price: 5800 },
-        { id: "o8", name: "Amor Prohibido", price: 6800 }
-    ],
-
-    "Toppings": [
-        { id: "t1", name: "Oreo", price: 500 },
-        { id: "t2", name: "Maní", price: 150 },
-        { id: "t3", name: "Froot Loops", price: 300 },
-        { id: "t4", name: "Choco Arroz", price: 300 },
-        { id: "t5", name: "Salsa", price: 300 },
-        { id: "t6", name: "Choco Salsa", price: 400 }
-    ],
-
-};
+        const defaultMenu = {
+            "Hamburguesas": [
+                { id: "h1", name: "Burger Clasica", price: 14000 },
+                { id: "h1c", name: "Combo Clasica", price: 19500 },
+                { id: "h2", name: "Chicken Burger", price: 14000 },
+                { id: "h2c", name: "Combo Chicken", price: 19500 },
+                { id: "h3", name: "Burger Ranchera", price: 16500 },
+                { id: "h3c", name: "Combo Ranchera", price: 22000 },
+                { id: "h4", name: "Venus de Jalea", price: 16500 },
+                { id: "h4c", name: "Combo Venus", price: 22000 },
+                { id: "h5", name: "Burger Crunch", price: 17500 },
+                { id: "h5c", name: "Combo Crunch", price: 23000 },
+                { id: "h6", name: "Ranchera Pikante", price: 17000 },
+                { id: "h6c", name: "Combo Pikante", price: 22500 },
+                { id: "h7", name: "Western Doble Carne", price: 19500 },
+                { id: "h7c", name: "Combo Western", price: 25000 },
+                { id: "h8", name: "Hamburguesa El Vaquero", price: 18000 },
+                { id: "h8c", name: "Combo Vaquero", price: 23500 },
+                { id: "h9", name: "Monster Gigante", price: 24500 },
+                { id: "h9c", name: "Combo Monster", price: 29000 }
+            ],
+            "Adiciones": [
+                { id: "a1", name: "Tocineta", price: 1000 },
+                { id: "a2", name: "Queso cheddar", price: 1000 },
+                { id: "a3", name: "Chorizo ranchero", price: 3000 },
+                { id: "a4", name: "Platano maduro", price: 2500 },
+                { id: "a5", name: "Adicion carne", price: 5000 }
+            ],
+            "Bebidas": [
+                { id: "b1", name: "Coca Cola 500ml", price: 3500 },
+                { id: "b2", name: "Jugo Hit 500ml", price: 3500 }
+            ]
+        };
 
         // State
         let menu = defaultMenu;
